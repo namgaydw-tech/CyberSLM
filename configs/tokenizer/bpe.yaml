@@ -1,0 +1,9 @@
+vocab_size: 16000
+min_frequency: 2
+special_tokens:
+  - "<pad>"
+  - "<unk>"
+  - "<bos>"
+  - "<eos>"
+normalization: nfkc
+
