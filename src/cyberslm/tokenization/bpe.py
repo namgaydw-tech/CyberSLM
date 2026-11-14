@@ -5,6 +5,7 @@ import json
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, cast
 
 from tokenizers import Tokenizer, decoders, models, normalizers, pre_tokenizers, trainers
 
@@ -48,7 +49,7 @@ class BPETokenizer:
             raise ValueError(f"Unsupported normalization: {config.normalization}")
         tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
         tokenizer.decoder = decoders.ByteLevel()
-        trainer = trainers.BpeTrainer(  # type: ignore[no-untyped-call]
+        trainer = cast(Any, trainers.BpeTrainer)(
             vocab_size=config.vocab_size,
             min_frequency=config.min_frequency,
             special_tokens=list(config.special_tokens),
