@@ -1,0 +1,14 @@
+paths:
+  - data/raw/*.parquet
+text_column: text
+document_id_column: document_id
+source_url_column: source_url
+publisher_column: publisher
+report_year_column: report_year
+batch_size: 4096
+seed: 42
+train_fraction: 0.9
+validation_fraction: 0.05
+test_fraction: 0.05
+split_strategy: grouped
+
