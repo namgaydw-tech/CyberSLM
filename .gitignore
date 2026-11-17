@@ -39,3 +39,77 @@ wandb/
 .DS_Store
 Thumbs.db
 
+
+# CyberSLM protected-data safeguards
+
+# Local Python and Jupyter environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.jupyter/
+
+# Local or private data, source event records, generated artifacts
+/data/
+**/data/
+**/datasets_train_data/
+**/source_event_files/
+**/runs/
+**/outputs/
+**/checkpoints/
+**/models/
+**/huggingface/
+**/hf_cache/
+**/.cache/
+
+# Raw datasets and model binary artifacts
+*.parquet
+*.arrow
+*.feather
+*.csv
+*.tsv
+*.jsonl
+*.ndjson
+*.pickle
+*.pkl
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.h5
+*.hdf5
+*.npz
+*.npy
+*.bin
+*.zip
+*.7z
+*.tar
+*.gz
+*.sqlite
+*.db
+
+# Secrets and local configuration (keep public examples explicitly named .example)
+.env
+.env.*
+!.env.example
+*token*.txt
+*secret*.txt
+*credentials*.json
+*service-account*.json
+id_rsa*
+id_ed25519*
+
+# Temporary outputs and OS/IDE noise
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+.vscode/.ropeproject/
+.idea/
