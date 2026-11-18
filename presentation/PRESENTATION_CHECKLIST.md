@@ -19,7 +19,7 @@ run is not evidence that a remote upload or Ollama registration succeeded.
 | Stage B validation evaluated | PASS | 28-example validation EM 32.14%; 199-example cross-scenario EM 32.66% |
 | Hugging Face model uploaded | PASS | Public repository and fresh remote download/native restore verified |
 | Hugging Face dataset uploaded | PASS | Six fictional rows only; fresh remote download and manifest inspection verified |
-| GitHub source published to `main` | PENDING | Require remote commit SHA and README verification |
+| GitHub source published to `main` | PASS | PR #3 merged; remote README and merge SHA verified |
 | GGUF conversion is faithful | PENDING | Runtime passes; exact native-logit comparison remains outstanding |
 | `ollama create` succeeds | PASS | Ollama 0.40.16 registered `cyberslm-35m:latest`, 70 MB |
 | `ollama run` produces trained-model output | PASS | Three prompts executed; poor/repetitive outputs recorded below |
@@ -52,8 +52,8 @@ run is not evidence that a remote upload or Ollama registration succeeded.
 | Stage B checkpoint SHA-256 | `a86577065a5ab95ac76d82ffbefc3b4a60769ec493b03e2e3d3b22954adb9d94` |
 | Hugging Face model URL | `https://huggingface.co/namgaydw-ai/CyberSLM-35M` |
 | Hugging Face dataset URL | `https://huggingface.co/datasets/namgaydw-ai/CyberSLM-Evidence-QA` |
-| GitHub main commit SHA | `PENDING` |
-| GitHub main URL | `PENDING` |
+| GitHub release merge SHA | `b9c629eb69b1b8bb612761d85c93268367a676d0` |
+| GitHub main URL | `https://github.com/namgaydw-tech/CyberSLM` |
 | GGUF path and SHA-256 | `cyberslm-35m-stage-b-f16.gguf`; `d580042c919069ccf03bbe4327f8a60085f814a6ee5d432bde455bbf7b5aa831` |
 | Ollama registered name | `cyberslm-35m:latest` |
 

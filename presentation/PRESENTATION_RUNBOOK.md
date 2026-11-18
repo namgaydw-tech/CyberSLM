@@ -138,8 +138,8 @@ show them unedited as evidence of the model's limited generalization.
 ## 10. Show GitHub main
 
 ```text
-GitHub main URL:  PENDING
-Published commit: PENDING
+GitHub main URL:  https://github.com/namgaydw-tech/CyberSLM
+Published commit: b9c629eb69b1b8bb612761d85c93268367a676d0
 ```
 
 Before presenting a commit as published, verify it from a fresh fetch:
