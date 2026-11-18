@@ -1,0 +1,13 @@
+# Verified byte-tokenizer export candidate. Keep the original model as fallback.
+FROM ./cyberslm-35m-structured-byte-f16.gguf
+
+PARAMETER num_ctx 512
+PARAMETER temperature 0
+PARAMETER top_k 1
+PARAMETER top_p 1
+PARAMETER min_p 0
+PARAMETER repeat_penalty 1
+PARAMETER num_predict 32
+
+# Literal completion template: no Llama/ChatML wrapper.
+TEMPLATE """{{ .Prompt }}"""

@@ -1,0 +1,9 @@
+# CyberSLM-35M structured-QA neural checkpoint, preserved beside the earlier model.
+FROM ./cyberslm-35m-structured-f16.gguf
+
+PARAMETER num_ctx 512
+PARAMETER temperature 0
+PARAMETER num_predict 32
+
+# Raw completion only: the model was not trained with Llama or ChatML wrappers.
+TEMPLATE """{{ .Prompt }}"""

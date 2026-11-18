@@ -187,9 +187,10 @@ def main() -> None:
         completion = tokenizer.decode(generated[len(input_ids[0]) :])
         outputs.append({"prompt": prompt, "output": completion})
     summary = {
-        "status": "COMPLETED_LIMITED_DATA_STAGE_B",
+        "status": "COMPLETED_STAGE_B_ADAPTATION",
         "limitation": (
-            "Only 388 training QA examples; broad cybersecurity reasoning is not established."
+            f"Structured adaptation used {len(train_data)} examples; broad cybersecurity "
+            "reasoning is not established by task-template performance."
         ),
         "parameter_count": count_parameters(model),
         "stage_a_checkpoint": str(args.stage_a_checkpoint.resolve()),

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "presentation_distinct_types",
+    "task": "distinct_event_types",
+    "prompt": "Structured cybersecurity evidence; statistics are not an attack verdict.\ncounts:EVENT_OPEN=22;EVENT_READ=8\nsources:5\ndestinations:12\ndirected_edges:25\nfirst_type:EVENT_READ\nlast_type:EVENT_OPEN\nquestion:count unique event types\nReturn only the answer.\nanswer:",
+    "reference_answer": "2"
+  },
+  {
+    "id": "presentation_event_count",
+    "task": "event_count",
+    "prompt": "Structured cybersecurity evidence; statistics are not an attack verdict.\ncounts:EVENT_READ=2;EVENT_SENDTO=17;EVENT_WRITE=28\nsources:14\ndestinations:8\ndirected_edges:18\nfirst_type:EVENT_READ\nlast_type:EVENT_READ\nquestion:count EVENT_READ\nReturn only the answer.\nanswer:",
+    "reference_answer": "2"
+  },
+  {
+    "id": "presentation_unsupported_verdict",
+    "task": "unsupported_attack_verdict",
+    "prompt": "Structured cybersecurity evidence; statistics are not an attack verdict.\ncounts:EVENT_READ=15;EVENT_WRITE=25\nsources:10\ndestinations:6\ndirected_edges:26\nfirst_type:EVENT_WRITE\nlast_type:EVENT_READ\nquestion:is a confirmed attack established YES or NO\nReturn only the answer.\nanswer:",
+    "reference_answer": "NO"
+  }
+]

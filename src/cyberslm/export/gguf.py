@@ -10,18 +10,31 @@ import torch
 
 
 def byte_token_gguf_vocab() -> tuple[list[str], list[float], list[int]]:
-    """Return the exact CyberSLM ID order as an SPM byte-fallback vocabulary."""
+    """Return the exact CyberSLM ID order as a merge-free GPT-2 byte vocabulary."""
     # Import locally so the rest of the package does not require the optional GGUF dependency.
     import gguf  # type: ignore[import-not-found]
 
+    visible = list(range(ord("!"), ord("~") + 1))
+    visible.extend(range(ord("¡"), ord("¬") + 1))
+    visible.extend(range(ord("®"), ord("ÿ") + 1))
+    codepoints = visible.copy()
+    next_codepoint = 256
+    for value in range(256):
+        if value not in visible:
+            visible.append(value)
+            codepoints.append(next_codepoint)
+            next_codepoint += 1
+    byte_to_unicode = {
+        value: chr(codepoint) for value, codepoint in zip(visible, codepoints, strict=True)
+    }
     tokens = ["<pad>", "<s>", "</s>"]
-    tokens.extend(f"<0x{value:02X}>" for value in range(256))
-    scores = [0.0, 0.0, 0.0, *([-1000.0] * 256)]
+    tokens.extend(byte_to_unicode[value] for value in range(256))
+    scores = [0.0] * 259
     types = [
         int(gguf.TokenType.CONTROL),
         int(gguf.TokenType.CONTROL),
         int(gguf.TokenType.CONTROL),
-        *([int(gguf.TokenType.BYTE)] * 256),
+        *([int(gguf.TokenType.NORMAL)] * 256),
     ]
     return tokens, scores, types
 
@@ -136,12 +149,14 @@ def export_checkpoint_to_gguf(
         )
     )
 
-    tokens, scores, token_types = byte_token_gguf_vocab()
-    writer.add_tokenizer_model("llama")
+    tokens, _scores, token_types = byte_token_gguf_vocab()
+    writer.add_tokenizer_model("gpt2")
     writer.add_tokenizer_pre("default")
     writer.add_token_list(tokens)
-    writer.add_token_scores(scores)
     writer.add_token_types(token_types)
+    # llama.cpp requires the BPE merges metadata key and gguf-py omits empty arrays.
+    # This unreachable control-token pair materializes the key without merging prompt bytes.
+    writer.add_token_merges(["<pad> <s>"])
     writer.add_pad_token_id(0)
     writer.add_bos_token_id(1)
     writer.add_eos_token_id(2)
@@ -173,7 +188,7 @@ def export_checkpoint_to_gguf(
         "output_dtype": output_dtype,
         "model_config": config,
         "tokenizer": {
-            "model": "llama_byte_fallback",
+            "model": "gpt2_merge_free_byte",
             "vocab_size": len(tokens),
             "pad_id": 0,
             "bos_id": 1,

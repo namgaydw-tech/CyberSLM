@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "dataset_id": "cyberslm_structured_qa_v1",
+  "dataset_seed": 2031,
+  "train_examples": 4050,
+  "validation_examples": 810,
+  "frozen_test_examples": 1620,
+  "frozen_test_cases": 180,
+  "frozen_test_sha256": "736f14b71f2daffa401c159ef93a88f31b9b4e00506002646749f3ad3404c880",
+  "previous_neural": {
+    "correct": 49,
+    "total": 1620,
+    "exact_match": 0.030246913580246913
+  },
+  "improved_neural": {
+    "correct": 557,
+    "total": 1620,
+    "exact_match": 0.34382716049382717,
+    "numerical_correct": 178,
+    "numerical_total": 900,
+    "numerical_correctness": 0.19777777777777777
+  },
+  "deterministic_hybrid": {
+    "correct": 1620,
+    "total": 1620,
+    "exact_match": 1.0,
+    "note": "Verified deterministic calculation, not neural generation."
+  }
+}

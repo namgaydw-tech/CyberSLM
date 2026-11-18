@@ -17,6 +17,21 @@ CyberSLM is a scratch-built, 35.2-million-parameter decoder-only language model 
 
 The Stage B evaluation exposes a serious limitation: the model emitted only 11 unique predictions on each evaluation split and often repeated dominant training templates. Low teacher-forced loss does not demonstrate reliable free-form reasoning.
 
+### Structured-QA improvement experiment
+
+A later, preserved experiment adapted the same 35.2M architecture for 800 steps on 4,050
+task-balanced fictional structured-QA examples. On a newly frozen, scenario-isolated holdout of
+1,620 questions, the previous neural checkpoint scored 3.02% exact match and the improved neural
+checkpoint scored 34.38% (95% Wilson CI 32.11%–36.73%). A separately labeled deterministic
+evidence engine scored 100% (lower 95% bound 99.76%); that hybrid score is not neural accuracy.
+
+The original improved GGUF used SentencePiece metadata for a raw byte tokenizer, causing spaces
+to expand into three incorrect token IDs. The replacement merge-free GPT-2 byte vocabulary
+restores exact input-token identity and achieved 180/180 task-balanced native-versus-Ollama
+greedy output matches. See
+[`reports/cyberslm_35m_structured_accuracy_v1.md`](reports/cyberslm_35m_structured_accuracy_v1.md)
+for the frozen-test methodology, per-task results, hashes, error classes, and deployment receipt.
+
 ## Architecture
 
 | Item | Value |
@@ -84,6 +99,11 @@ python scripts\build_stage_a_corpus.py --sources configs\stage_a_sources.json --
 python scripts\train_stage_a.py --config configs\training\cyberslm_35m_stage_a.yaml
 python scripts\train_stage_b.py --config configs\training\cyberslm_35m_stage_b.yaml
 python scripts\evaluate_checkpoint_qa.py --help
+
+# Structured-QA improvement run
+python scripts\build_structured_qa.py --seed 2031 --output-dir data\structured_qa\cyberslm_structured_qa_v1
+python scripts\train_stage_b.py --stage-a-checkpoint outputs\cyberslm_35m_stage_a_nist_v1\checkpoints\step_001000.pt --dataset-dir data\structured_qa\cyberslm_structured_qa_v1 --output-dir outputs\cyberslm_35m_stage_b_structured_v1 --training-config configs\training\cyberslm_35m_stage_b_structured.yaml
+python scripts\evaluate_structured_qa.py --checkpoint outputs\cyberslm_35m_stage_b_structured_v1\checkpoints\final_step_000800.pt --dataset data\structured_qa\cyberslm_structured_qa_v1\cross_scenario_test_qa.parquet --output-dir outputs\cyberslm_35m_stage_b_structured_v1\evaluation\cross_scenario_test
 ```
 
 Review the corpus manifest and source/license record before training. Do not commit generated data. Run the quality gates before contributing:
@@ -104,16 +124,23 @@ python load_model.py --prompt "Cybersecurity risk management requires" --max-new
 
 ## GGUF and Ollama
 
-The source repository includes the exporter and a Modelfile, but not the 70.7 MB GGUF binary. Download `cyberslm-35m-stage-b-f16.gguf` from the model release, place it beside `ollama/Modelfile`, then run:
+The improved hosted package contains `cyberslm-35m-structured-byte-f16.gguf`. Download it beside
+`ollama/Modelfile.structured-byte`, then run:
 
 ```powershell
-ollama --version
-ollama create cyberslm-35m -f .\ollama\Modelfile
+ollama create cyberslm-35m-structured-byte -f .\ollama\Modelfile.structured-byte
 ollama list
-ollama run cyberslm-35m
+powershell -NoProfile -ExecutionPolicy Bypass -File .\presentation\Run-CyberSLM-Demo.ps1
 ```
 
-Ollama 0.40.16 imported the GGUF as `cyberslm-35m:latest` and generated text on the RTX 4050. The first prompt continued with `and 1 repeated edge occurrences.` This confirms runtime execution, not semantic correctness or exact native-logit parity.
+The fixed GGUF SHA-256 is
+`60d8e46194ea05b9be52c7d06538113a29bb4e8bb72db63c404637e64ca4ea40`.
+Ollama 0.40.16 registered it as `cyberslm-35m-structured-byte:latest`. The earlier
+`cyberslm-35m-structured:latest` and `cyberslm-35m:latest` registrations remain available as
+fallbacks. Token IDs matched exactly on the diagnostic prompt, top-ten first-token log
+probabilities agreed within approximately `1e-3`, and greedy strings matched on all 180
+task-balanced parity prompts. This verifies the tested runtime path, not the model's answer
+correctness; frozen-test neural exact match remains 34.38%.
 
 ## Repository map
 
@@ -140,6 +167,8 @@ Consult the remote revision history and presentation checklist before describing
 - `ATTACK_CANDIDATE` annotations and anomaly scores are review signals, not confirmed attacks.
 - Low language-model loss can coexist with memorized answer templates.
 - This model must not autonomously block systems, attribute actors, or make incident verdicts.
-- A new investigation-grouped, untouched test set and multiple-seed evaluation are required before stronger generalization claims.
+- The structured holdout is scenario-grouped and frozen, but multiple-seed training and
+  evaluation on independently authorized observational records are still required before
+  stronger generalization claims.
 
 See [`docs/experimental_results.md`](docs/experimental_results.md), [`docs/dataset_validation.md`](docs/dataset_validation.md), and [`docs/remaining_limitations.md`](docs/remaining_limitations.md) for the audit trail.

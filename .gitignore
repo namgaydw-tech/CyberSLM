@@ -29,7 +29,12 @@ htmlcov/
 hf_artifacts/
 **/.cache/
 logs/
-reports/
+reports/*
+!reports/.gitkeep
+!reports/cyberslm_35m_structured_accuracy_v1.md
+!reports/cyberslm_35m_parity_receipt.json
+!reports/cyberslm_35m_accuracy_receipt.json
+!reports/cyberslm_35m_training_summary_public.json
 experiments/
 wandb/
 
