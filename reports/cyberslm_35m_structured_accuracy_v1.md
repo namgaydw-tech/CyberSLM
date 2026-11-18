@@ -1,6 +1,6 @@
 # CyberSLM-35M structured evidence-QA accuracy experiment
 
-Date: 2026-11-18  
+Date: 2026-11-18
 Status: completed experiment; neural 99% target not achieved; deterministic hybrid target achieved
 
 ## Result summary

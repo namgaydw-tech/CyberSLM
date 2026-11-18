@@ -1,6 +1,6 @@
 # CyberSLM presentation runbook
 
-Presentation target: 19 November 2026  
+Presentation target: 19 November 2026
 Prepared runtime: Windows PowerShell, Ollama 0.40.16
 
 ## One-command demonstration
