@@ -21,11 +21,12 @@ def test_byte_token_vocab_preserves_ids() -> None:
     tokens, scores, token_types = byte_token_gguf_vocab()
     assert len(tokens) == len(scores) == len(token_types) == 259
     assert tokens[:3] == ["<pad>", "<s>", "</s>"]
-    assert tokens[3] == "<0x00>"
-    assert tokens[3 + ord("A")] == "<0x41>"
-    assert tokens[258] == "<0xFF>"
+    assert tokens[3] == "Ā"
+    assert tokens[3 + ord(" ")] == "Ġ"
+    assert tokens[3 + ord("A")] == "A"
+    assert tokens[258] == "ÿ"
     assert token_types[:3] == [int(gguf.TokenType.CONTROL)] * 3
-    assert set(token_types[3:]) == {int(gguf.TokenType.BYTE)}
+    assert set(token_types[3:]) == {int(gguf.TokenType.NORMAL)}
 
 
 def test_tensor_mapping_and_checkpoint_shapes() -> None:
@@ -68,8 +69,9 @@ def test_tiny_gguf_round_trip_preserves_tensor_values(tmp_path: Path) -> None:
     reader = gguf.GGUFReader(output)
     assert report["status"] == "FORMAT_EXPORTED_RUNTIME_PARITY_NOT_YET_VERIFIED"
     assert len(reader.tensors) == len(expected_tensor_mapping(1))
+    assert reader.get_field("tokenizer.ggml.model").contents() == "gpt2"
     tokens = reader.get_field("tokenizer.ggml.tokens").contents()
-    assert len(tokens) == 259 and tokens[3] == "<0x00>" and tokens[-1] == "<0xFF>"
+    assert len(tokens) == 259 and tokens[3] == "Ā" and tokens[-1] == "ÿ"
     exported = reader.get_tensor(0).data
     torch.testing.assert_close(
         torch.from_numpy(exported.copy()), model.token_embedding.weight.detach()

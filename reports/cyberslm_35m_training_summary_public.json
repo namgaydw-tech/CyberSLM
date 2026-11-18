@@ -1,0 +1,20 @@
+{
+  "status": "COMPLETED_STAGE_B_ADAPTATION",
+  "parameter_count": 35205120,
+  "stage_a_step": 1000,
+  "stage_a_checkpoint_sha256": "cea167c1bd0d3709d3e912d00e26c885ccaae10202bb5622a96b6601d9f526b6",
+  "optimizer_steps": 800,
+  "best_step": 800,
+  "training_examples": 4050,
+  "validation_examples": 810,
+  "answer_token_exposures": 51871,
+  "effective_example_epochs": 1.5802469135802468,
+  "first_training_loss": 7.023796916007996,
+  "final_training_loss": 0.550044609233737,
+  "best_validation_loss": 0.5685627614458402,
+  "duration_seconds": 662.7998014999976,
+  "checkpoint_sha256": "72185b281de6baaf80003d8bdf5cbd4e2af9602f596a01b4308ef978f314f675",
+  "tokenizer_fingerprint": "a80a43ee5efffef6821b8fabfec209048732113843a93e070e700242f4e4e983e",
+  "seed": 2031,
+  "limitation": "Structured adaptation performance does not establish broad cybersecurity reasoning."
+}

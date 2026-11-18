@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "date": "2026-11-18",
+  "checkpoint": "outputs/cyberslm_35m_stage_b_structured_v1/checkpoints/final_step_000800.pt",
+  "checkpoint_sha256": "72185b281de6baaf80003d8bdf5cbd4e2af9602f596a01b4308ef978f314f675",
+  "original_gguf": "ollama/cyberslm-35m-structured-f16.gguf",
+  "original_gguf_sha256": "103a2047a9032c67d4fdc479022ddb3b60d2db19f13c27a30695366b15cad744",
+  "replacement_gguf": "ollama/cyberslm-35m-structured-byte-f16.gguf",
+  "replacement_gguf_bytes": 70707200,
+  "replacement_gguf_sha256": "60d8e46194ea05b9be52c7d06538113a29bb4e8bb72db63c404637e64ca4ea40",
+  "ollama_version": "0.40.16",
+  "ollama_model": "cyberslm-35m-structured-byte:latest",
+  "root_cause": "The original GGUF declared a SentencePiece tokenizer for CyberSLM's raw byte vocabulary. ASCII spaces became three UTF-8 byte tokens for the SentencePiece whitespace marker instead of byte-plus-three ID 35.",
+  "token_identity_check": {
+    "native_tokens": 278,
+    "llama_cpp_tokens": 278,
+    "identical": true,
+    "bos_id": 1,
+    "space_id": 35
+  },
+  "first_token_check": {
+    "native_argmax_id": 72,
+    "llama_cpp_argmax_id": 72,
+    "decoded_token": "E",
+    "native_log_probability": -0.0048590670339763165,
+    "llama_cpp_log_probability": -0.004857516847550869
+  },
+  "greedy_output_parity": {
+    "sample_method": "First 20 frozen-test rows per task in deterministic parquet order",
+    "tasks": 9,
+    "examples_per_task": 20,
+    "examples": 180,
+    "matching_outputs": 180,
+    "native_exact_matches": 62,
+    "ollama_exact_matches": 62
+  },
+  "accuracy_separation_note": "Parity verifies the tested deployment path only. Official frozen-test neural exact match remains 557/1620 (34.38%)."
+}
