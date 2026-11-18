@@ -1,0 +1,14 @@
+seed: 2027
+device: auto
+batch_size: 1
+sequence_length: 512
+learning_rate: 0.00005
+weight_decay: 0.01
+max_steps: 100
+warmup_steps: 10
+gradient_accumulation_steps: 4
+gradient_clip_norm: 1.0
+mixed_precision: true
+validate_every: 10
+checkpoint_every: 25
+log_every: 5

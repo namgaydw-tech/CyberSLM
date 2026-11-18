@@ -1,0 +1,73 @@
+{
+  "corpus_id": "cyberslm_stage_a_nist_v1",
+  "retrieval_date": "2026-11-18",
+  "license_evidence": {
+    "status": "NIST federal publications are generally public domain in the United States; verify individual markings",
+    "urls": [
+      "https://www.nist.gov/nist-research-library/library-faqs",
+      "https://www.nist.gov/copyrights-disclaimers"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "nist_sp_800_53r5",
+      "title": "Security and Privacy Controls for Information Systems and Organizations",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_53ar5",
+      "title": "Assessing Security and Privacy Controls in Information Systems and Organizations",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53Ar5.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_37r2",
+      "title": "Risk Management Framework for Information Systems and Organizations",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-37r2.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_30r1",
+      "title": "Guide for Conducting Risk Assessments",
+      "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-30r1.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_115",
+      "title": "Technical Guide to Information Security Testing and Assessment",
+      "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-115.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_171r3",
+      "title": "Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-171r3.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_207",
+      "title": "Zero Trust Architecture",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_218",
+      "title": "Secure Software Development Framework Version 1.1",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf",
+      "split": "train"
+    },
+    {
+      "source_id": "nist_sp_800_61r3",
+      "title": "Incident Response Recommendations and Considerations for Cybersecurity Risk Management",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r3.pdf",
+      "split": "validation"
+    },
+    {
+      "source_id": "nist_cswp_29",
+      "title": "The NIST Cybersecurity Framework 2.0",
+      "url": "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf",
+      "split": "validation"
+    }
+  ]
+}

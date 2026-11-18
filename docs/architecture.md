@@ -1,5 +1,18 @@
 # Architecture
 
+## CyberSLM-35M coursework configuration
+
+The verified `configs/model/cyberslm_35m.yaml` configuration uses 10 decoder blocks,
+hidden width 512, 8 attention heads, SwiGLU width 1,600, a 259-token UTF-8 byte
+vocabulary and a 512-token context. Input/output embeddings are tied. The resulting
+trainable parameter count is 35,205,120. RoPE, RMSNorm, causal scaled-dot-product
+attention, residual connections, gradient checkpointing and answer-only `-100` loss
+masking are implemented locally; no pretrained model weights are downloaded.
+
+The model supports PyTorch SDPA and an eager reference attention path. CUDA smoke tests
+used SDPA. CUDA memory-efficient backward reported nondeterministic-kernel behavior, so
+seed recording does not imply bitwise-identical GPU results.
+
 The data path is intentionally staged and non-destructive:
 
 ```text

@@ -1,0 +1,10 @@
+# Place the verified CyberSLM GGUF beside this file before importing.
+FROM ./cyberslm-35m-stage-b-f16.gguf
+
+PARAMETER num_ctx 512
+PARAMETER temperature 0
+PARAMETER num_predict 96
+
+# CyberSLM Stage B was trained on literal evidence/question/answer prompts.
+# Do not apply Llama, ChatML, or another unrelated chat template.
+TEMPLATE """{{ .Prompt }}"""
