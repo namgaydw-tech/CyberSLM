@@ -7,6 +7,7 @@ from typing import NamedTuple, cast
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
+from torch.utils.checkpoint import checkpoint
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,8 @@ class ModelConfig:
     dropout: float = 0.0
     rope_base: float = 10_000.0
     tie_embeddings: bool = True
+    attention_implementation: str = "sdpa"
+    gradient_checkpointing: bool = False
 
     def __post_init__(self) -> None:
         if self.d_model % self.n_heads:
@@ -31,6 +34,8 @@ class ModelConfig:
             raise ValueError("attention head dimension must be even for RoPE")
         if self.max_seq_len < 2 or self.vocab_size < 1:
             raise ValueError("max_seq_len and vocab_size must be positive")
+        if self.attention_implementation not in {"sdpa", "eager"}:
+            raise ValueError("attention_implementation must be 'sdpa' or 'eager'")
 
 
 class ModelOutput(NamedTuple):
@@ -78,6 +83,7 @@ class CausalSelfAttention(nn.Module):
         self.v_proj = nn.Linear(config.d_model, config.n_kv_heads * self.head_dim, bias=False)
         self.out_proj = nn.Linear(config.d_model, config.d_model, bias=False)
         self.dropout = config.dropout
+        self.implementation = config.attention_implementation
         self.rope = RotaryEmbedding(self.head_dim, config.max_seq_len, config.rope_base)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -90,13 +96,22 @@ class CausalSelfAttention(nn.Module):
             repeats = self.n_heads // self.n_kv_heads
             key = key.repeat_interleave(repeats, dim=1)
             value = value.repeat_interleave(repeats, dim=1)
-        output = F.scaled_dot_product_attention(
-            query,
-            key,
-            value,
-            dropout_p=self.dropout if self.training else 0.0,
-            is_causal=True,
-        )
+        if self.implementation == "sdpa":
+            output = F.scaled_dot_product_attention(
+                query,
+                key,
+                value,
+                dropout_p=self.dropout if self.training else 0.0,
+                is_causal=True,
+            )
+        else:
+            scale = self.head_dim**-0.5
+            scores = torch.matmul(query, key.transpose(-2, -1)) * scale
+            causal_mask = torch.ones(seq_len, seq_len, device=x.device, dtype=torch.bool).triu(1)
+            scores = scores.masked_fill(causal_mask, -torch.inf)
+            probabilities = F.softmax(scores.float(), dim=-1).to(dtype=query.dtype)
+            probabilities = F.dropout(probabilities, p=self.dropout, training=self.training)
+            output = torch.matmul(probabilities, value)
         output = output.transpose(1, 2).contiguous().view(batch, seq_len, -1)
         return cast(Tensor, self.out_proj(output))
 
@@ -138,6 +153,11 @@ class CyberSLM(nn.Module):
         if config.tie_embeddings:
             self.lm_head.weight = self.token_embedding.weight
         self.apply(self._init_weights)
+        residual_std = 0.02 / math.sqrt(2 * config.n_layers)
+        for raw_block in self.layers:
+            block = cast(TransformerBlock, raw_block)
+            nn.init.normal_(block.attention.out_proj.weight, mean=0.0, std=residual_std)
+            nn.init.normal_(block.feed_forward.down.weight, mean=0.0, std=residual_std)
 
     @staticmethod
     def _init_weights(module: nn.Module) -> None:
@@ -151,13 +171,18 @@ class CyberSLM(nn.Module):
             raise ValueError("input sequence exceeds max_seq_len")
         hidden = self.token_embedding(input_ids)
         for layer in self.layers:
-            hidden = layer(hidden)
+            if self.config.gradient_checkpointing and self.training:
+                hidden = checkpoint(layer, hidden, use_reentrant=False)
+            else:
+                hidden = layer(hidden)
         logits = self.lm_head(self.final_norm(hidden))
         loss = None
         if labels is not None:
             if labels.shape != input_ids.shape:
                 raise ValueError("labels must match input_ids shape")
-            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1))
+            loss = F.cross_entropy(
+                logits.reshape(-1, logits.size(-1)), labels.reshape(-1), ignore_index=-100
+            )
         return ModelOutput(logits, loss)
 
     @torch.inference_mode()
