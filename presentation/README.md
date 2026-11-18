@@ -30,8 +30,8 @@ broad cybersecurity reasoning.
 
 | Deliverable | Verified value |
 | --- | --- |
-| GitHub main branch | `PENDING - remote main publication not yet verified` |
-| GitHub commit SHA | `PENDING` |
+| GitHub main branch | `https://github.com/namgaydw-tech/CyberSLM` |
+| GitHub release merge | `b9c629eb69b1b8bb612761d85c93268367a676d0` |
 | Hugging Face model repository | `https://huggingface.co/namgaydw-ai/CyberSLM-35M` |
 | Hugging Face dataset repository | `https://huggingface.co/datasets/namgaydw-ai/CyberSLM-Evidence-QA` |
 | Stage A checkpoint | step 1,000; SHA-256 `cea167c1bd0d3709d3e912d00e26c885ccaae10202bb5622a96b6601d9f526b6` |
@@ -43,4 +43,5 @@ broad cybersecurity reasoning.
 - `PRESENTATION_CHECKLIST.md`: pass/pending/blocked gate for each assignment requirement.
 - `PRESENTATION_RUNBOOK.md`: exact Windows PowerShell presentation sequence and native fallback.
 
-GitHub fields remain pending until the remote `main` revision is independently verified.
+The GitHub, Hugging Face, training, and Ollama receipts above were independently verified on
+18 November 2026. Remaining `PENDING` gates are explicitly identified in the checklist.
