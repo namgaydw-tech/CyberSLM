@@ -9,6 +9,7 @@ if (-not (Test-Path -LiteralPath ".\.venv\Scripts\python.exe")) {
     py -3.13 -m venv .venv
 }
 & ".\.venv\Scripts\python.exe" -m pip install -e ".[assistant]"
+& ".\.venv\Scripts\python.exe" -c "import pandas, pyarrow; print('Index serializers:', pandas.__version__, pyarrow.__version__)"
 ollama pull qwen2.5:1.5b-instruct-q4_K_M
 ollama pull all-minilm
 $env:PYTHONPATH = "src"

@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import pyarrow
 import pypdfium2 as pdfium
 
 from cyberslm.rag import ollama_embeddings
@@ -21,6 +22,17 @@ def sha256_file(path: Path) -> str:
     with path.open("rb") as handle:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
+    return digest.hexdigest()
+
+
+def canonical_rows_sha256(frame: pd.DataFrame) -> str:
+    digest = hashlib.sha256()
+    for row in frame.to_dict(orient="records"):
+        encoded = json.dumps(
+            row, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+        ).encode("utf-8")
+        digest.update(encoded)
+        digest.update(b"\n")
     return digest.hexdigest()
 
 
@@ -276,7 +288,13 @@ def main() -> None:
         "embedding_model": args.embedding_model,
         "embedding_dimensions": int(embeddings.shape[1]),
         "chunks_sha256": sha256_file(chunks_path),
+        "chunks_content_sha256": canonical_rows_sha256(frame),
         "embeddings_sha256": sha256_file(embeddings_path),
+        "serialization_versions": {
+            "numpy": np.__version__,
+            "pandas": pd.__version__,
+            "pyarrow": pyarrow.__version__,
+        },
         "source_config_sha256": sha256_file(args.config),
         "sources": source_receipts,
         "privacy": "Public technical sources only; no private reports or event records",

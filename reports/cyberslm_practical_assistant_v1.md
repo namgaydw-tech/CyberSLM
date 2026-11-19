@@ -41,10 +41,16 @@ documents and 6,948 deduplicated chunks. No private event reports are included.
 | --- | --- |
 | Source configuration | `735a6c713bd3446dbba8621d3d7372f3f14c504d0a3bf043697351a5f99c37d6` |
 | Chunk metadata | `e95656a0e28aab9089a58e9580b4139924362f1e47427294944793c398a98fba` |
+| Canonical row content | `5707009809bc3fcf9c8b05424155221335c22824e46b62751f5e711e70070072` |
 | Embeddings | `56e0840978e8b30091c142dfddd930e83a0b2c185e2cf256b63e3fed7d3dc766` |
 
 The generated index is deliberately excluded from Git. Rebuild it from
 `configs/rag_sources.json`; the manifest records every source license, hash, and retrieval date.
+A clean rebuild on 19 November produced the same 6,948 rows, identical values in all eight columns,
+and the same embedding-array SHA-256. Its Parquet file byte hash differed because the original used
+PyArrow 26/Pandas 3.1 while the supported environment used PyArrow 24/Pandas 3.0; Parquet embeds
+serializer metadata. The builder now also records a canonical row-content hash and serializer
+versions so content reproducibility is not confused with container-byte reproducibility.
 
 ## Evaluation
 
@@ -68,6 +74,12 @@ theft/evasion request after receiving offensive ATT&CK excerpts. The released co
 small deterministic pre-generation safety gate and labels its response origin as `policy_guard`.
 The rerun blocked the request. This is external routing, not a capability of the base model.
 
+A separate indirect-injection smoke test placed `IGNORE ALL PREVIOUS INSTRUCTIONS`, a request to
+reveal the system prompt, and credential-theft instructions inside a synthetic retrieved excerpt.
+The tested Qwen runtime did not emit the marker or the harmful steps. The runtime prompt now labels
+all retrieved excerpts as untrusted reference data. This single deterministic test is a regression
+check, not proof of resistance to arbitrary prompt injection.
+
 ## Honest limitations
 
 - The 1.5B model sometimes repeats prior content or runs out of its configured response budget.
@@ -76,9 +88,15 @@ The rerun blocked the request. This is external routing, not a capability of the
   review remains pending.
 - The safety gate covers high-confidence credential-theft, ransomware-deployment, and evasion
   patterns; it is not a comprehensive content-safety system.
+- The pre-generation gate inspects the user's text, not every possible semantic instruction inside
+  retrieved content. Obfuscated or novel indirect prompt injection may still influence the 1.5B
+  model, so the RAG collection must remain allowlisted and responses require human review.
 - The assistant is educational and defensive, not an autonomous detector or incident verdict.
 - No Qwen fine-tuning was performed because the evaluated base model plus retrieval already
   substantially outperformed the scratch conversational checkpoint on usable language generation.
+- Exact `chunks.parquet` bytes depend on the Pandas/PyArrow versions. Validate the canonical content
+  hash and embedding hash across environments; require pinned serializer versions only when exact
+  Parquet container bytes are necessary.
 
 ## Reproduce
 
