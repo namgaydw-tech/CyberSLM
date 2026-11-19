@@ -1,0 +1,13 @@
+# Experimental chat checkpoint. Do not replace the verified structured fallback.
+FROM ./cyberslm-35m-chat-f16.gguf
+
+PARAMETER num_ctx 512
+PARAMETER temperature 0
+PARAMETER top_k 1
+PARAMETER top_p 1
+PARAMETER repeat_penalty 1
+PARAMETER num_predict 128
+PARAMETER stop "<|end|>"
+
+# The application supplies the exact trained role delimiters and retained history.
+TEMPLATE """{{ .Prompt }}"""

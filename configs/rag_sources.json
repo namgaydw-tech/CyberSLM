@@ -1,0 +1,35 @@
+{
+  "collection_id": "cyberslm_trusted_knowledge_v1",
+  "retrieval_date": "2026-11-19",
+  "sources": [
+    {
+      "kind": "local_parquet",
+      "source_id": "nist_stage_a_collection",
+      "path": "data/stage_a/cyberslm_stage_a_nist_v1/corpus.parquet",
+      "license": "NIST federal publications are generally public domain in the United States; retain individual publication markings"
+    },
+    {
+      "kind": "mitre_attack_stix",
+      "source_id": "mitre_attack_enterprise_20_1",
+      "title": "MITRE ATT&CK Enterprise v20.1",
+      "url": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack-20.1.json",
+      "overview": "MITRE ATT&CK is a globally accessible knowledge base of adversary tactics and techniques based on real-world observations. ATT&CK for Enterprise documents adversary behavior targeting enterprise networks. Tactics describe an adversary's objective, while techniques and sub-techniques describe how that objective may be achieved. ATT&CK supports threat modeling, detection engineering, defensive coverage analysis, and incident investigation, but it does not enumerate every possible behavior or guarantee defensive coverage.",
+      "license": "MITRE ATT&CK Terms of Use: non-exclusive royalty-free research, development and commercial use with attribution",
+      "attribution": "© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation."
+    },
+    {
+      "kind": "pdf",
+      "source_id": "cisa_incident_response_playbooks",
+      "title": "Federal Government Cybersecurity Incident and Vulnerability Response Playbooks",
+      "url": "https://www.cisa.gov/sites/default/files/2024-08/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf",
+      "license": "U.S. Government publication; retain source attribution and document markings"
+    },
+    {
+      "kind": "pdf",
+      "source_id": "cisa_uncovering_malicious_activity",
+      "title": "Technical Approaches to Uncovering Malicious Activity",
+      "url": "https://www.cisa.gov/sites/default/files/publications/AA20-245A-Joint_CSA-Technical_Approaches_to_Uncovering_Malicious_Activity_508.pdf",
+      "license": "U.S. Government joint cybersecurity advisory; retain source attribution and document markings"
+    }
+  ]
+}
