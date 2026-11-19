@@ -54,6 +54,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--ollama-model", default="cyberslm-35m-structured")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434/api/generate")
+    parser.add_argument("--max-new-tokens", type=int, default=32)
+    parser.add_argument("--stop-text")
     args = parser.parse_args()
 
     tokenizer = ByteTokenizer()
@@ -73,7 +75,8 @@ def main() -> None:
     for example in examples:
         prompt = str(example["prompt"])
         reference = str(example["reference_answer"])
-        limit = min(32, len(reference.encode("utf-8")) + 1)
+        requested_limit = int(example.get("num_predict", len(reference.encode("utf-8")) + 1))
+        limit = min(args.max_new_tokens, requested_limit)
         prompt_ids = tokenizer.encode(prompt, bos=True)
         inputs = torch.tensor([prompt_ids], dtype=torch.long, device=device)
         generated = model.generate(
@@ -86,6 +89,9 @@ def main() -> None:
             generated = generated[: generated.index(tokenizer.eos_id)]
         native_output = tokenizer.decode(generated).strip()
         ollama_output = ollama_generate(args.ollama_url, args.ollama_model, prompt, limit)
+        if args.stop_text:
+            native_output = native_output.split(args.stop_text, 1)[0].strip()
+            ollama_output = ollama_output.split(args.stop_text, 1)[0].strip()
         native_output_ids = tokenizer.encode(native_output)
         ollama_output_ids = tokenizer.encode(ollama_output)
         first_divergence = next(

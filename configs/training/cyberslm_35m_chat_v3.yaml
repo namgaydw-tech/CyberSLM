@@ -1,0 +1,14 @@
+seed: 2041
+device: auto
+batch_size: 2
+sequence_length: 512
+learning_rate: 0.00003
+weight_decay: 0.01
+max_steps: 300
+warmup_steps: 10
+gradient_accumulation_steps: 4
+gradient_clip_norm: 1.0
+mixed_precision: true
+validate_every: 50
+checkpoint_every: 50
+log_every: 10

@@ -35,6 +35,7 @@ reports/*
 !reports/cyberslm_35m_parity_receipt.json
 !reports/cyberslm_35m_accuracy_receipt.json
 !reports/cyberslm_35m_training_summary_public.json
+!reports/cyberslm_35m_chat_experiment_v1.md
 experiments/
 wandb/
 

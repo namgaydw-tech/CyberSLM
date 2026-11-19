@@ -32,6 +32,21 @@ greedy output matches. See
 [`reports/cyberslm_35m_structured_accuracy_v1.md`](reports/cyberslm_35m_structured_accuracy_v1.md)
 for the frozen-test methodology, per-task results, hashes, error classes, and deployment receipt.
 
+## Conversational experiment — 19 November 2026
+
+A separate, genuinely trained `CyberSLM-35M-Chat` experiment is preserved on the development
+branch. Its F16 GGUF achieved 10/10 native-versus-Ollama greedy parity and is registered locally as
+`cyberslm-35m-chat:latest`, but the model failed the release gates: 1/108 frozen-test exact match,
+31.48% automated relevance/factuality proxy, 43.52% termination, and 0/1,620 retained structured
+neural exact match. Independent human review is still pending. It is not hosted or presented as a
+reliable chat assistant.
+
+The local Streamlit UI labels neural chat experimental and keeps deterministic structured analysis
+separate. For the presentation, continue using the verified
+`cyberslm-35m-structured-byte:latest` fallback and the existing one-command runbook. See
+[`reports/cyberslm_35m_chat_experiment_v1.md`](reports/cyberslm_35m_chat_experiment_v1.md) for the
+complete corpus, training, evaluation, parity, and publication decision receipts.
+
 ## Architecture
 
 | Item | Value |

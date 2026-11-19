@@ -1,0 +1,52 @@
+[
+  {
+    "prompt": "<|user|>\nHi CyberSLM.\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nWhat can you help me with?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nExplain machine learning in simple terms.\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nWhat is a cybersecurity anomaly?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nSuggest three beginner cybersecurity projects.\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nExplain your first suggestion.\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nWhat does RoPE do in a Transformer?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nCan 15 network events confirm an attack?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nHow are you different from a general LLM?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  },
+  {
+    "prompt": "<|user|>\nCan you summarize what we discussed?\n<|assistant|>\n",
+    "reference_answer": "",
+    "num_predict": 64
+  }
+]
