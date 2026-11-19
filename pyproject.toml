@@ -28,6 +28,10 @@ dev = [
 export = [
   "gguf>=0.19,<0.20",
 ]
+assistant = [
+  "pypdfium2>=4.30,<5",
+  "streamlit>=1.40,<2",
+]
 
 [project.scripts]
 cyberslm-data = "cyberslm.data.cli:main"

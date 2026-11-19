@@ -47,6 +47,45 @@ separate. For the presentation, continue using the verified
 [`reports/cyberslm_35m_chat_experiment_v1.md`](reports/cyberslm_35m_chat_experiment_v1.md) for the
 complete corpus, training, evaluation, parity, and publication decision receipts.
 
+## Practical conversational assistant — 19 November 2026
+
+The default Streamlit mode is now a separately identified practical pipeline based on
+`Qwen2.5-1.5B-Instruct` Q4_K_M (1.54B parameters, Apache-2.0). It is **not** the scratch-built
+CyberSLM-35M. CyberSLM adds local Ollama and LM Studio adapters, multi-turn history, defensive
+routing, and retrieval over approved NIST, MITRE ATT&CK, and CISA material. No parameter-efficient
+fine-tuning is claimed in this version.
+
+The local knowledge index contains 1,605 public documents and 6,948 chunks embedded with
+`all-minilm`. Its chunk SHA-256 is
+`e95656a0e28aab9089a58e9580b4139924362f1e47427294944793c398a98fba`. The model GGUF used by
+both tested runtimes has SHA-256
+`183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4`.
+
+On the 12-question unseen diagnostic, the raw practical baseline reached 67% mean required-term
+coverage and supplied no sources on the nine source-required questions. The grounded configuration
+reached 83% mean term coverage and supplied retrieved sources on 9/9 source-required questions.
+These are automated diagnostics, not a human correctness score. A six-turn acceptance conversation
+completed through both Ollama and LM Studio. The 1.5B model can still be repetitive, truncate long
+answers, and make unsupported claims; retrieved passages are references, not proof that every
+generated sentence is correct. A deterministic safety gate is visibly labeled when it blocks
+credential theft or evasion requests after an early test exposed a model-only refusal failure.
+
+See [`reports/cyberslm_practical_assistant_v1.md`](reports/cyberslm_practical_assistant_v1.md) for
+the comparison, provenance, actual evaluation limitations, and run receipts.
+
+### Run the local chat
+
+```powershell
+# First-time setup: public documents + local model downloads (about 1.1 GB plus the index)
+.\presentation\Setup-CyberSLM-Assistant.ps1
+
+# One-command startup after setup
+.\presentation\Start-CyberSLM-Assistant.ps1
+```
+
+Select **Practical conversational assistant** for Qwen + retrieval, or select **Original
+CyberSLM-35M evidence mode** to demonstrate the scratch-built Transformer separately.
+
 ## Architecture
 
 | Item | Value |

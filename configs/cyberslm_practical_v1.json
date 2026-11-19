@@ -1,0 +1,21 @@
+{
+  "display_name": "CyberSLM Conversational Assistant v1",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "base_model_parameters": "1.54B",
+  "base_model_license": "Apache-2.0",
+  "customization": [
+    "defensive cybersecurity system instructions",
+    "multi-turn history management",
+    "retrieval over approved NIST, MITRE ATT&CK, and CISA sources",
+    "Streamlit interface and local-runtime adapters"
+  ],
+  "fine_tuned": false,
+  "ollama_model": "qwen2.5:1.5b-instruct-q4_K_M",
+  "ollama_gguf_sha256": "183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4",
+  "lm_studio_identifier": "cyberslm-practical",
+  "quantization": "Q4_K_M",
+  "context_length_used": 8192,
+  "embedding_model": "all-minilm:latest",
+  "knowledge_index": "data/rag/cyberslm_trusted_knowledge_v1",
+  "identity_disclosure": "This practical assistant is not the scratch-built CyberSLM-35M model."
+}
