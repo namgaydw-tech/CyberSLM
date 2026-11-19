@@ -9,7 +9,6 @@ from typing import Any
 
 import streamlit as st
 
-from cyberslm.assistant import practical_chat
 
 import sys
 from pathlib import Path
@@ -21,6 +20,29 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from cyberslm.assistant import practical_chat
+
+
+
+import json
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+import streamlit as st
+
+# Make the src/ package accessible on Streamlit Cloud.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+# Import CyberSLM only AFTER configuring the path.
+from cyberslm.chat import fit_chat_history
+
 
 from cyberslm.chat import fit_chat_history
 from cyberslm.demo import analyze_structured_events, deterministic_answer
