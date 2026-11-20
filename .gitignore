@@ -8,6 +8,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.next/
+node_modules/
+*.tsbuildinfo
 .coverage
 htmlcov/
 .ipynb_checkpoints/
@@ -37,6 +40,7 @@ reports/*
 !reports/cyberslm_35m_training_summary_public.json
 !reports/cyberslm_35m_chat_experiment_v1.md
 !reports/cyberslm_practical_assistant_v1.md
+!reports/cyberslm_fault_tolerance_v1.md
 experiments/
 wandb/
 
@@ -81,6 +85,7 @@ id_ed25519*
 
 # Temporary outputs and OS/IDE noise
 *.log
+vercel_app/tests/*.png
 *.tmp
 tmp/
 *.bak

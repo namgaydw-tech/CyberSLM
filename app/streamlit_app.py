@@ -1,31 +1,8 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 import json
-import time
-import urllib.error
-import urllib.request
-from pathlib import Path
-from typing import Any
-
-import streamlit as st
-
-
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SRC_DIR = PROJECT_ROOT / "src"
-
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
-
-from cyberslm.assistant import practical_chat
-
-
-
-import json
-import sys
-import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -40,21 +17,20 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Import CyberSLM only AFTER configuring the path.
 from cyberslm.chat import fit_chat_history
-
-
-from cyberslm.chat import fit_chat_history
+from cyberslm.chat_router import parse_uploaded_bytes, route_practical_message
 from cyberslm.demo import analyze_structured_events, deterministic_answer
 from cyberslm.rag import KnowledgeRetriever
-from cyberslm.chat_router import parse_uploaded_bytes, route_practical_message
+from cyberslm.runtime_manager import (
+    AllProvidersUnavailable,
+    fault_tolerant_chat,
+    get_qwen_manager,
+    get_scratch_manager,
+)
 
 OLLAMA_GENERATE = "http://127.0.0.1:11434/api/generate"
-OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags"
 RAG_INDEX = Path("data/rag/cyberslm_trusted_knowledge_v1")
 PRACTICAL_OLLAMA_MODEL = "qwen2.5:1.5b-instruct-q4_K_M"
-PRACTICAL_LM_STUDIO_MODEL = "cyberslm-practical"
-SCRATCH_STRUCTURED_MODEL = "cyberslm-35m-structured-byte:latest"
 SCRATCH_CHAT_MODEL = "cyberslm-35m-chat:latest"
 
 
@@ -74,11 +50,6 @@ def http_json(url: str, payload: dict[str, Any] | None = None) -> dict[str, Any]
 @st.cache_resource
 def load_retriever() -> KnowledgeRetriever:
     return KnowledgeRetriever(RAG_INDEX)
-
-
-def available_ollama_models() -> list[str]:
-    response = http_json(OLLAMA_TAGS)
-    return [str(item["name"]) for item in response.get("models", [])]
 
 
 def structured_prompt(facts: dict[str, Any], question: str) -> str:
@@ -114,45 +85,52 @@ if mode == "Practical conversational assistant":
         "CyberSLM adds trusted-source retrieval, prompting, history, evaluation, and this UI. "
         "This is not the scratch-built 35M model."
     )
-    provider_label = st.sidebar.selectbox("Inference runtime", ["Ollama", "LM Studio"])
-    provider = "ollama" if provider_label == "Ollama" else "lm_studio"
-    model = PRACTICAL_OLLAMA_MODEL if provider == "ollama" else PRACTICAL_LM_STUDIO_MODEL
+    provider_label = st.sidebar.selectbox(
+        "Inference runtime",
+        ["Automatic: Ollama → LM Studio", "Ollama preferred", "LM Studio preferred"],
+    )
+    provider = {
+        "Automatic: Ollama → LM Studio": "auto",
+        "Ollama preferred": "ollama",
+        "LM Studio preferred": "lm_studio",
+    }[provider_label]
+    model = PRACTICAL_OLLAMA_MODEL
     answer_style = st.sidebar.selectbox("Answer detail", ["Balanced", "Concise", "Detailed"])
     use_rag = st.sidebar.toggle("Trusted knowledge retrieval", value=True)
     evidence_file = st.sidebar.file_uploader(
         "Optional THEIA event/anomaly results (local)",
         type=["csv", "json", "jsonl", "parquet"],
-        help="Attach actual event-level results for dataset-specific questions. Local data is not NIST RAG.",
+        help=(
+            "Attach actual event-level results for dataset-specific questions. "
+            "Local data is not NIST RAG."
+        ),
     )
     evidence_rows = None
     if evidence_file is not None:
         try:
-            evidence_rows = parse_uploaded_bytes(
-                evidence_file.name, evidence_file.getvalue()
-            )
+            evidence_rows = parse_uploaded_bytes(evidence_file.name, evidence_file.getvalue())
             st.sidebar.success(f"Local evidence loaded: {len(evidence_rows)} rows")
         except (ValueError, UnicodeError, ImportError, OSError) as error:
             st.sidebar.error(f"Evidence file rejected: {error}")
     score_rule = st.sidebar.selectbox(
         "Anomaly score convention",
         ["Higher score = more anomalous", "Lower score = more anomalous"],
-        help="Confirm this using the actual anomaly detector. E.g. scikit-learn's decision_function: lower is more abnormal.",
+        help=(
+            "Confirm this using the actual anomaly detector. E.g. scikit-learn's "
+            "decision_function: lower is more abnormal."
+        ),
     )
     top_k = st.sidebar.slider("Retrieved excerpts", 2, 6, 4)
     max_tokens = st.sidebar.slider("Maximum response tokens", 128, 768, 384, 64)
     temperature = st.sidebar.slider("Temperature", 0.0, 0.8, 0.2, 0.05)
-    try:
-        if provider == "ollama":
-            runtime_ready = model in available_ollama_models()
+    for status in get_qwen_manager().health():
+        label = f"{status.provider}: {status.model}"
+        if status.reachable and status.model_available:
+            st.sidebar.success(f"{label} ready")
+        elif status.reachable:
+            st.sidebar.warning(f"{label} unavailable")
         else:
-            runtime = http_json("http://127.0.0.1:1234/v1/models")
-            runtime_ready = any(item.get("id") == model for item in runtime.get("data", []))
-        if runtime_ready:
-            st.sidebar.success(f"{provider_label} ready · {model}")
-        else:
-            st.sidebar.error(f"{provider_label} is reachable, but {model} is not loaded.")
-    except (OSError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
-        st.sidebar.error(f"{provider_label} health check failed: {error}")
+            st.sidebar.caption(f"{label} offline")
     if st.sidebar.button("Reset conversation", use_container_width=True):
         st.session_state.practical_history = []
         st.rerun()
@@ -186,22 +164,24 @@ if mode == "Practical conversational assistant":
                 model=model,
                 provider=provider,
                 answer_style=answer_style,
-                retriever_factory=(
-                    (lambda: load_retriever()) if use_rag else (lambda: None)
-                ),
+                retriever_factory=((lambda: load_retriever()) if use_rag else (lambda: None)),
                 evidence_records=evidence_rows,
                 higher_is_more_anomalous=score_rule.startswith("Higher"),
                 top_k=top_k,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                conversation_fn=fault_tolerant_chat,
             )
             sources = [s for s in response.sources if s.get("title") and s.get("url")]
             with st.chat_message("assistant"):
                 st.write(response.content)
                 st.caption(
-                    f"{response.latency_seconds:.2f}s · {provider_label} · {response.model} · "
+                    f"{response.latency_seconds:.2f}s · {response.provider or provider_label} · "
+                    f"{response.model} · "
                     f"{len(sources)} reference sources · origin: {response.response_origin}"
                 )
+                if response.runtime_attempts:
+                    st.caption("Runtime path: " + " → ".join(response.runtime_attempts))
                 if response.verified_facts is not None:
                     st.markdown("**Verified uploaded-data statistics**")
                     st.json(response.verified_facts)
@@ -215,13 +195,18 @@ if mode == "Practical conversational assistant":
                                 f"- [{source['title']}]({source['url']}) "
                                 f"(retrieval score {source['score']:.3f})"
                             )
-            st.session_state.practical_history.extend([
-                {"role": "user", "content": user_message},
-                {"role": "assistant", "content": response.content,
-                 "sources": sources,
-                 "verified_facts": response.verified_facts,
-                 "generated_explanation": response.generated_explanation},
-            ])
+            st.session_state.practical_history.extend(
+                [
+                    {"role": "user", "content": user_message},
+                    {
+                        "role": "assistant",
+                        "content": response.content,
+                        "sources": sources,
+                        "verified_facts": response.verified_facts,
+                        "generated_explanation": response.generated_explanation,
+                    },
+                ]
+            )
         except (
             ValueError,
             OSError,
@@ -263,24 +248,16 @@ elif mode == "Original CyberSLM-35M evidence mode":
             events = json.loads(raw)
             facts = analyze_structured_events(events)
             prompt = structured_prompt(facts, question)
-            started = time.perf_counter()
-            neural = http_json(
-                OLLAMA_GENERATE,
-                {
-                    "model": SCRATCH_STRUCTURED_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0, "num_predict": 32, "num_ctx": 512},
-                },
-            )
-            neural_latency = time.perf_counter() - started
+            neural = get_scratch_manager().infer(prompt)
             st.subheader("Observed statistics")
             st.json(facts)
             left, right = st.columns(2)
             with left:
                 st.subheader("Scratch-built neural output")
-                st.code(str(neural["response"]).strip())
-                st.caption(f"{neural_latency:.2f}s · {SCRATCH_STRUCTURED_MODEL}")
+                st.code(neural.content)
+                st.caption(
+                    f"{neural.latency_seconds:.2f}s · {neural.model} · runtime: {neural.runtime}"
+                )
             with right:
                 st.subheader("Verified deterministic answer")
                 st.write(deterministic_answer(facts, question))
@@ -291,6 +268,7 @@ elif mode == "Original CyberSLM-35M evidence mode":
             OSError,
             urllib.error.URLError,
             json.JSONDecodeError,
+            AllProvidersUnavailable,
         ) as error:
             st.error(str(error))
 

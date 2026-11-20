@@ -86,6 +86,37 @@ the comparison, provenance, actual evaluation limitations, and run receipts.
 Select **Practical conversational assistant** for Qwen + retrieval, or select **Original
 CyberSLM-35M evidence mode** to demonstrate the scratch-built Transformer separately.
 
+## Fault-tolerant runtimes and Vercel surface — 20 November 2026
+
+The local backend now keeps the research model independent of the explanation model:
+
+- Scratch path: `cyberslm-35m-structured-byte:latest` on Ollama, then the identity-checked native
+  PyTorch checkpoint on CPU or CUDA.
+- Conversational path: Qwen on Ollama, then Qwen in LM Studio under the validated identifier
+  `cyberslm-practical`, then an explicit unavailable result.
+- Evidence path: deterministic counts and verification remain usable when Qwen is down.
+
+The preserved checkpoint hash was rechecked, and native CPU output matched Ollama for all three
+supported presentation questions. A separate Next.js app lives in `vercel_app/`; it keeps evidence
+verification live on Vercel and proxies model calls only to a server-only authenticated HTTPS
+backend. It does not claim that Vercel can reach laptop-local Ollama or LM Studio.
+
+```powershell
+.\presentation\Start-CyberSLM-Fault-Tolerant.ps1
+.\presentation\Test-CyberSLM-Failover.ps1
+
+cd vercel_app
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+See [`reports/cyberslm_fault_tolerance_v1.md`](reports/cyberslm_fault_tolerance_v1.md) for the live
+diagnosis, architecture, test evidence, exact bridge locations, safety limitations, and Vercel
+blocker. No retraining or model-weight replacement was performed.
+
 ## Architecture
 
 | Item | Value |
