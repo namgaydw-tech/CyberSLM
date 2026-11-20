@@ -47,6 +47,7 @@ from cyberslm.chat import fit_chat_history
 from cyberslm.chat import fit_chat_history
 from cyberslm.demo import analyze_structured_events, deterministic_answer
 from cyberslm.rag import KnowledgeRetriever
+from cyberslm.chat_router import parse_uploaded_bytes, route_practical_message
 
 OLLAMA_GENERATE = "http://127.0.0.1:11434/api/generate"
 OLLAMA_TAGS = "http://127.0.0.1:11434/api/tags"
@@ -118,6 +119,25 @@ if mode == "Practical conversational assistant":
     model = PRACTICAL_OLLAMA_MODEL if provider == "ollama" else PRACTICAL_LM_STUDIO_MODEL
     answer_style = st.sidebar.selectbox("Answer detail", ["Balanced", "Concise", "Detailed"])
     use_rag = st.sidebar.toggle("Trusted knowledge retrieval", value=True)
+    evidence_file = st.sidebar.file_uploader(
+        "Optional THEIA event/anomaly results (local)",
+        type=["csv", "json", "jsonl", "parquet"],
+        help="Attach actual event-level results for dataset-specific questions. Local data is not NIST RAG.",
+    )
+    evidence_rows = None
+    if evidence_file is not None:
+        try:
+            evidence_rows = parse_uploaded_bytes(
+                evidence_file.name, evidence_file.getvalue()
+            )
+            st.sidebar.success(f"Local evidence loaded: {len(evidence_rows)} rows")
+        except (ValueError, UnicodeError, ImportError, OSError) as error:
+            st.sidebar.error(f"Evidence file rejected: {error}")
+    score_rule = st.sidebar.selectbox(
+        "Anomaly score convention",
+        ["Higher score = more anomalous", "Lower score = more anomalous"],
+        help="Confirm this using the actual anomaly detector. E.g. scikit-learn's decision_function: lower is more abnormal.",
+    )
     top_k = st.sidebar.slider("Retrieved excerpts", 2, 6, 4)
     max_tokens = st.sidebar.slider("Maximum response tokens", 128, 768, 384, 64)
     temperature = st.sidebar.slider("Temperature", 0.0, 0.8, 0.2, 0.05)
@@ -141,6 +161,12 @@ if mode == "Practical conversational assistant":
     for item in st.session_state.practical_history:
         with st.chat_message(item["role"]):
             st.write(item["content"])
+            if item["role"] == "assistant" and item.get("verified_facts") is not None:
+                with st.expander("Verified uploaded-data statistics"):
+                    st.json(item["verified_facts"])
+                if item.get("generated_explanation"):
+                    st.markdown("**Qwen explanation (not independently verified)**")
+                    st.write(item["generated_explanation"])
             if item["role"] == "assistant" and item.get("sources"):
                 with st.expander("Sources used"):
                     for source in item["sources"]:
@@ -154,28 +180,34 @@ if mode == "Practical conversational assistant":
             for item in st.session_state.practical_history
         ]
         try:
-            retriever = load_retriever() if use_rag else None
-            response = practical_chat(
+            response = route_practical_message(
                 user_message,
                 history_for_model,
                 model=model,
                 provider=provider,
                 answer_style=answer_style,
-                retriever=retriever,
+                retriever_factory=(
+                    (lambda: load_retriever()) if use_rag else (lambda: None)
+                ),
+                evidence_records=evidence_rows,
+                higher_is_more_anomalous=score_rule.startswith("Higher"),
                 top_k=top_k,
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
-            sources = [
-                {"title": source.title, "url": source.source_url, "score": source.score}
-                for source in response.sources
-            ]
+            sources = [s for s in response.sources if s.get("title") and s.get("url")]
             with st.chat_message("assistant"):
                 st.write(response.content)
                 st.caption(
                     f"{response.latency_seconds:.2f}s · {provider_label} · {response.model} · "
-                    f"{len(sources)} retrieved sources · origin: {response.response_origin}"
+                    f"{len(sources)} reference sources · origin: {response.response_origin}"
                 )
+                if response.verified_facts is not None:
+                    st.markdown("**Verified uploaded-data statistics**")
+                    st.json(response.verified_facts)
+                if response.generated_explanation:
+                    st.markdown("**Qwen explanation (not independently verified)**")
+                    st.write(response.generated_explanation)
                 if sources:
                     with st.expander("Sources used", expanded=True):
                         for source in sources:
@@ -183,12 +215,13 @@ if mode == "Practical conversational assistant":
                                 f"- [{source['title']}]({source['url']}) "
                                 f"(retrieval score {source['score']:.3f})"
                             )
-            st.session_state.practical_history.extend(
-                [
-                    {"role": "user", "content": user_message},
-                    {"role": "assistant", "content": response.content, "sources": sources},
-                ]
-            )
+            st.session_state.practical_history.extend([
+                {"role": "user", "content": user_message},
+                {"role": "assistant", "content": response.content,
+                 "sources": sources,
+                 "verified_facts": response.verified_facts,
+                 "generated_explanation": response.generated_explanation},
+            ])
         except (
             ValueError,
             OSError,
